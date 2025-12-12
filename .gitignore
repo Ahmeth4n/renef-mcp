@@ -1,0 +1,30 @@
+
+*.pyc
+
+**/*/__pycache__
+
+./renef/
+
+# Build artifacts
+dist/
+build/
+*.egg-info/
+.eggs/
+
+# Virtual environment
+.venv/
+venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# macOS
+.DS_Store
+
+# Temporary download files
+*.tar.gz
+renef-v*

@@ -1,0 +1,24 @@
+Renef v0.1.0 - Installation Guide
+=====================================
+
+Platform-specific binaries:
+- linux/renef                : Linux x64 client
+- macos-x64/renef            : macOS Intel client
+- macos-arm64/renef          : macOS Silicon (ARM64) client
+- android/renef_server       : Android ARM64 server
+- android/libagent.so        : Android ARM64 payload
+
+Quick Start (Linux):
+1. Extract archive
+2. Push to Android device:
+   adb push android/renef_server /data/local/tmp/
+   adb push android/libagent.so /data/local/tmp/.r
+   adb shell chmod +x /data/local/tmp/renef_server
+3. Setup port forwarding:
+   adb forward tcp:1907 localabstract:com.android.internal.os.RuntimeInit
+4. Start server on device:
+   adb shell /data/local/tmp/renef_server
+5. Run client:
+   ./linux/renef
+
+For detailed documentation, visit: https://renef.io

@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "renef-mcp-dev": {
+      "command": "bash",
+      "args": ["dev.sh"],
+      "cwd": ".",
+      "description": "Development mode - runs from source with virtual environment"
+    },
+    "renef-mcp": {
+      "command": "python",
+      "args": ["-m", "src.main"],
+      "description": "Production mode - uses installed package (pip install renef-mcp)"
+    }
+  }
+}

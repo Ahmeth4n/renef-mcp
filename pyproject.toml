@@ -1,0 +1,73 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "renef-mcp"
+version = "0.1.0"
+description = "MCP server for Renef - Dynamic Instrumentation Toolkit for Android ARM64"
+readme = "README.md"
+authors = [
+    {name = "Byteria", email = "info@byterialab.com"}
+]
+license = {text = "MIT"}
+requires-python = ">=3.8"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Information Technology",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Security",
+    "Topic :: Software Development :: Debuggers",
+    "Topic :: System :: Monitoring",
+]
+keywords = ["mcp", "renef", "android", "instrumentation", "reverse-engineering", "security", "dynamic-analysis", "hooking"]
+
+dependencies = [
+    "mcp>=1.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "black>=22.0.0",
+    "ruff>=0.1.0",
+]
+
+[project.urls]
+Homepage = "https://renef.io"
+Documentation = "https://renef.io/"
+Repository = "https://github.com/ahmeth4n/renef"
+Issues = "https://github.com/ahmeth4n/renef/issues"
+
+[project.scripts]
+renef-mcp = "src.main:main"
+
+[tool.setuptools]
+packages = ["src", "src.tools", "src.tools.core", "src.tools.memory", "src.tools.module", "src.tools.server", "src.tools.search", "src.tools.adb", "src.tools.hook", "src.resources", "src.resources.techniques"]
+
+[tool.setuptools.package-data]
+src = [
+    "techniques/**/*.md",
+    "docs/**/*",
+    "../bin/android/*",
+    "../bin/linux/*",
+    "../bin/macos-arm64/*",
+    "../bin/macos-x64/*",
+    "../bin/scripts/*.lua"
+]
+
+[tool.black]
+line-length = 100
+target-version = ['py38']
+
+[tool.ruff]
+line-length = 100
+target-version = "py38"

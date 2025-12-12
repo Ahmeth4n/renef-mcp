@@ -1,0 +1,160 @@
+{
+  "description": "SSL Pinning documentation mapping for different platforms",
+  "common_sections": {
+    "always_include": [
+      "introduction_to_ssl_pinning.md",
+      "how_ssl_tls_works.md",
+      "certificate_pinning_fundamentals.md",
+      "third_party_libraries.md",
+      "advanced_bypass_techniques.md",
+      "detection_anti_tampering.md",
+      "summary.md"
+    ],
+    "android_specific": [
+      "network_security_configuration.md"
+    ]
+  },
+  "platforms": {
+    "android_native": {
+      "name": "Native Android (Java/Kotlin)",
+      "files": [
+        "introduction_to_ssl_pinning.md",
+        "how_ssl_tls_works.md",
+        "certificate_pinning_fundamentals.md",
+        "android_native.md",
+        "network_security_configuration.md",
+        "third_party_libraries.md",
+        "advanced_bypass_techniques.md",
+        "detection_anti_tampering.md",
+        "summary.md"
+      ],
+      "detection_keywords": [
+        "TrustManager",
+        "OkHttp",
+        "HttpsURLConnection",
+        "javax.net.ssl",
+        "java",
+        "kotlin",
+        "network_security_config.xml"
+      ]
+    },
+    "flutter": {
+      "name": "Flutter",
+      "files": [
+        "introduction_to_ssl_pinning.md",
+        "how_ssl_tls_works.md",
+        "certificate_pinning_fundamentals.md",
+        "flutter.md",
+        "network_security_configuration.md",
+        "third_party_libraries.md",
+        "advanced_bypass_techniques.md",
+        "detection_anti_tampering.md",
+        "summary.md"
+      ],
+      "detection_keywords": [
+        "libflutter.so",
+        "HttpClient",
+        "dart:io",
+        "flutter",
+        "pubspec.yaml",
+        "http_certificate_pinning"
+      ]
+    },
+    "react_native": {
+      "name": "React Native",
+      "files": [
+        "introduction_to_ssl_pinning.md",
+        "how_ssl_tls_works.md",
+        "certificate_pinning_fundamentals.md",
+        "react_native.md",
+        "third_party_libraries.md",
+        "advanced_bypass_techniques.md",
+        "detection_anti_tampering.md",
+        "summary.md"
+      ],
+      "detection_keywords": [
+        "react-native",
+        "javascript",
+        "metro",
+        "libreactnativejni",
+        "react-native-ssl-pinning",
+        "package.json"
+      ]
+    },
+    "xamarin": {
+      "name": "Xamarin",
+      "files": [
+        "introduction_to_ssl_pinning.md",
+        "how_ssl_tls_works.md",
+        "certificate_pinning_fundamentals.md",
+        "xamarin.md",
+        "network_security_configuration.md",
+        "third_party_libraries.md",
+        "advanced_bypass_techniques.md",
+        "detection_anti_tampering.md",
+        "summary.md"
+      ],
+      "detection_keywords": [
+        "Xamarin",
+        "mono",
+        "ServicePointManager",
+        "System.Net.Http",
+        "csharp",
+        ".csproj"
+      ]
+    },
+    "cordova_ionic": {
+      "name": "Cordova/Ionic",
+      "files": [
+        "introduction_to_ssl_pinning.md",
+        "how_ssl_tls_works.md",
+        "certificate_pinning_fundamentals.md",
+        "cordova_ionic.md",
+        "third_party_libraries.md",
+        "advanced_bypass_techniques.md",
+        "detection_anti_tampering.md",
+        "summary.md"
+      ],
+      "detection_keywords": [
+        "cordova",
+        "ionic",
+        "cordova-plugin",
+        "config.xml",
+        "www/",
+        "cordova-plugin-advanced-http"
+      ]
+    },
+    "unity": {
+      "name": "Unity",
+      "files": [
+        "introduction_to_ssl_pinning.md",
+        "how_ssl_tls_works.md",
+        "certificate_pinning_fundamentals.md",
+        "unity.md",
+        "third_party_libraries.md",
+        "advanced_bypass_techniques.md",
+        "detection_anti_tampering.md",
+        "summary.md"
+      ],
+      "detection_keywords": [
+        "unity",
+        "libunity.so",
+        "il2cpp",
+        "UnityWebRequest",
+        "CertificateHandler",
+        "UnityEngine"
+      ]
+    }
+  },
+  "usage_instructions": {
+    "description": "How MCP server should use this mapping",
+    "steps": [
+      "1. Detect the platform from the target app (check for keywords, libraries, file structure)",
+      "2. Look up the platform key in the 'platforms' object",
+      "3. Retrieve the 'files' array for that platform",
+      "4. Concatenate the content of those files in order",
+      "5. Return the concatenated content as the response"
+    ],
+    "example": "For a Flutter app, return: introduction + how_ssl_tls_works + fundamentals + flutter + network_security + third_party + advanced_bypass + detection + summary"
+  }
+}

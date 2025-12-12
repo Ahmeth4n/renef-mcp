@@ -1,0 +1,17 @@
+include README.md
+include LICENSE
+include requirements.txt
+include .mcp.json
+include dev.sh
+recursive-include src/techniques *.md *.lua
+recursive-include src/docs *
+recursive-include src/resources *
+recursive-include bin *
+recursive-include bin/android *
+recursive-include bin/linux *
+recursive-include bin/macos-arm64 *
+recursive-include bin/macos-x64 *
+recursive-include bin/scripts *.lua
+exclude .gitignore
+recursive-exclude * __pycache__
+recursive-exclude * *.py[co]
