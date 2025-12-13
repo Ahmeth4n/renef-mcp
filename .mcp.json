@@ -7,8 +7,7 @@
       "description": "Development mode - runs from source with virtual environment"
     },
     "renef-mcp": {
-      "command": "python",
-      "args": ["-m", "src.main"],
+      "command": "renef-mcp",
       "description": "Production mode - uses installed package (pip install renef-mcp)"
     }
   }

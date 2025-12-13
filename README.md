@@ -27,8 +27,7 @@ Add to your MCP client configuration:
 {
   "mcpServers": {
     "renef": {
-      "command": "python",
-      "args": ["-m", "src.main"]
+      "command": "renef-mcp"
     }
   }
 }
