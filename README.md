@@ -1,5 +1,7 @@
 # Renef MCP Server
 
+![alt text](assets/renef-mcp-logo.png "Title")
+
 MCP server for Renef - Dynamic instrumentation toolkit for Android ARM64 reverse engineering and security analysis.
 
 ## Features
@@ -12,6 +14,9 @@ MCP server for Renef - Dynamic instrumentation toolkit for Android ARM64 reverse
 - SSL/TLS pinning bypass techniques
 - Framework detection (Flutter, React Native, Unity, Xamarin)
 - Comprehensive technique documentation
+
+## Screenshots
+<img src="assets/renef-claude.png" width="400">
 
 ## Installation
 
