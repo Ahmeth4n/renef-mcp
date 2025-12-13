@@ -42,6 +42,7 @@ Add to your MCP client configuration:
 ## Documentation
 
 - Homepage: https://renef.io
+- Renef tool: https://github.com/Ahmeth4n/renef
 - Repository: https://github.com/ahmeth4n/renef-mcp
 - Issues: https://github.com/ahmeth4n/renef-mcp/issues
 
