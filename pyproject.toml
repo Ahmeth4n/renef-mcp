@@ -44,8 +44,8 @@ dev = [
 [project.urls]
 Homepage = "https://renef.io"
 Documentation = "https://renef.io/"
-Repository = "https://github.com/ahmeth4n/renef"
-Issues = "https://github.com/ahmeth4n/renef/issues"
+Repository = "https://github.com/ahmeth4n/renef-mcp"
+Issues = "https://github.com/ahmeth4n/renef-mcp/issues"
 
 [project.scripts]
 renef-mcp = "src.main:main"

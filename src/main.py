@@ -3,5 +3,10 @@ from src import tools  # Auto-imports all tools
 from src import resources  # Auto-imports all resources
 
 
-if __name__ == "__main__":
+def main():
+    """Entry point for the renef-mcp command."""
     mcp.run()
+
+
+if __name__ == "__main__":
+    main()

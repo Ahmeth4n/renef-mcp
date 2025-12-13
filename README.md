@@ -37,8 +37,8 @@ Add to your MCP client configuration:
 ## Documentation
 
 - Homepage: https://renef.io
-- Repository: https://github.com/ahmeth4n/renef
-- Issues: https://github.com/ahmeth4n/renef/issues
+- Repository: https://github.com/ahmeth4n/renef-mcp
+- Issues: https://github.com/ahmeth4n/renef-mcp/issues
 
 ## License
 
