@@ -24,4 +24,17 @@ async def renef_spawn(package_name: str, hook_type: str = "") -> str:
     proc_module.process.stdin.write(cmd.encode())
     await proc_module.process.stdin.drain()
 
-    return await proc_module.read_until_prompt()
+    result = await proc_module.read_until_prompt()
+
+    # Parse PID from "OK <pid>" response and store it
+    # Example: "spawn com.example.app\nOK 12345"
+    for line in result.split('\n'):
+        line = line.strip()
+        if line.startswith("OK "):
+            parts = line.split()
+            if len(parts) >= 2 and parts[1].isdigit():
+                proc_module.current_target_pid = int(parts[1])
+                proc_module.current_target_package = package_name
+                break
+
+    return result
