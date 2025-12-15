@@ -1,50 +1,61 @@
+import asyncio
 from src.app import mcp
-from src import process as proc_module
 
 
 @mcp.tool()
-async def renef_watch(duration_seconds: int = 5) -> str:
+async def renef_watch(duration_seconds: int = 10, clear: bool = True) -> str:
     """
-    Collects hook output for specified duration.
+    Collects hook output from Android logcat.
 
-    NOTE: Does NOT send 'watch' command (blocks in MCP subprocess mode).
-    Hooks print directly to stdout when triggered, so we just read any output.
+    The Lua print() function automatically writes to logcat (tag: RENEF_LUA).
+    This tool reads those logs, bypassing the socket connection issues.
 
     Args:
-        duration_seconds: How long to watch for output (default: 5 seconds)
+        duration_seconds: How long to wait for output (default: 10 seconds)
+        clear: Clear logcat buffer before watching (default: True)
 
     Returns:
-        Captured hook output
+        Captured hook output from logcat
     """
-    import asyncio
+    if clear:
+        # Clear logcat buffer first
+        proc = await asyncio.create_subprocess_exec(
+            "adb", "logcat", "-c",
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.STDOUT,
+        )
+        await proc.communicate()
 
-    await proc_module.ensure_started()
+    # Wait for specified duration to collect output
+    await asyncio.sleep(duration_seconds)
 
-    # DO NOT send "watch" command - it blocks forever in subprocess mode!
-    # CLI watch uses recv() on TCP socket, but MCP uses stdin/stdout pipes.
-    # recv() doesn't work on pipes, so watch command hangs.
-    # Instead, just read any hook output that appears on stdout.
+    # Read RENEF_LUA tagged logs
+    proc = await asyncio.create_subprocess_exec(
+        "adb", "logcat", "-d", "-s", "RENEF_LUA:I",
+        stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.STDOUT,
+    )
+    stdout, _ = await proc.communicate()
 
-    buffer = b""
-    end_time = asyncio.get_event_loop().time() + duration_seconds
+    # Parse and clean output
+    lines = stdout.decode('utf-8', errors='replace').split('\n')
+    output = []
 
-    while asyncio.get_event_loop().time() < end_time:
-        try:
-            chunk = await asyncio.wait_for(
-                proc_module.process.stdout.read(1024),
-                timeout=0.5
-            )
-            if chunk:
-                buffer += chunk
-        except asyncio.TimeoutError:
+    for line in lines:
+        # Skip empty lines and header
+        if not line.strip() or line.startswith('-----'):
             continue
-        except Exception:
-            break
 
-    if not buffer:
-        return "No hook output captured"
+        # Extract [SCRIPT] messages (from print() calls in Lua)
+        if "[SCRIPT]" in line:
+            msg = line.split("[SCRIPT]", 1)[1].strip()
+            output.append(msg)
+        # Also capture [CLI_SEND] for debugging
+        elif "[CLI_SEND]" in line:
+            msg = line.split("[CLI_SEND]", 1)[1].strip()
+            output.append(f"[send] {msg}")
 
-    text = buffer.decode('utf-8', errors='replace')
-    text = text.replace("renef> ", "")
+    if not output:
+        return "No hook output in logcat"
 
-    return text if text else "No hook output captured"
+    return '\n'.join(output)
