@@ -16,7 +16,7 @@ async def renef_mem_read_string(address: str, max_length: int = 1024) -> str:
     """
     await proc_module.ensure_started()
 
-    lua_code = f'local str = mem.readStr({address}, {max_length}); print(str or "nil")'
+    lua_code = f'local str = Memory.readStr({address}, {max_length}); print(str or "nil")'
     proc_module.process.stdin.write(f"exec {lua_code}\n".encode())
     await proc_module.process.stdin.drain()
 

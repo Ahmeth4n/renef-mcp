@@ -15,7 +15,7 @@ async def renef_mem_read(address: str, size: int) -> str:
         Raw bytes in hex format
     """
     lua_code = f'''
-local data = mem.read({address}, {size})
+local data = Memory.read({address}, {size})
 if data then
     local hex = ""
     for i = 1, #data do

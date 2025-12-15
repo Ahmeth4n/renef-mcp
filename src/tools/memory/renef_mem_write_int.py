@@ -16,7 +16,7 @@ async def renef_mem_write_u8(address: str, value: int) -> str:
     """
     await proc_module.ensure_started()
 
-    lua_code = f'local ok = mem.writeU8({address}, {value}); print(ok and "✓ written" or "✗ failed")'
+    lua_code = f'Memory.writeU8({address}, {value}); print("✓ written")'
     proc_module.process.stdin.write(f"exec {lua_code}\n".encode())
     await proc_module.process.stdin.drain()
 
@@ -37,7 +37,7 @@ async def renef_mem_write_u16(address: str, value: int) -> str:
     """
     await proc_module.ensure_started()
 
-    lua_code = f'local ok = mem.writeU16({address}, {value}); print(ok and "✓ written" or "✗ failed")'
+    lua_code = f'Memory.writeU16({address}, {value}); print("✓ written")'
     proc_module.process.stdin.write(f"exec {lua_code}\n".encode())
     await proc_module.process.stdin.drain()
 
@@ -58,7 +58,7 @@ async def renef_mem_write_u32(address: str, value: int) -> str:
     """
     await proc_module.ensure_started()
 
-    lua_code = f'local ok = mem.writeU32({address}, {value}); print(ok and "✓ written" or "✗ failed")'
+    lua_code = f'Memory.writeU32({address}, {value}); print("✓ written")'
     proc_module.process.stdin.write(f"exec {lua_code}\n".encode())
     await proc_module.process.stdin.drain()
 
@@ -79,7 +79,7 @@ async def renef_mem_write_u64(address: str, value: int) -> str:
     """
     await proc_module.ensure_started()
 
-    lua_code = f'local ok = mem.writeU64({address}, {value}); print(ok and "✓ written" or "✗ failed")'
+    lua_code = f'Memory.writeU64({address}, {value}); print("✓ written")'
     proc_module.process.stdin.write(f"exec {lua_code}\n".encode())
     await proc_module.process.stdin.drain()
 

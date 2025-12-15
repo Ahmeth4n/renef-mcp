@@ -17,9 +17,9 @@ async def renef_mem_search(pattern: str, lib_name: str = "") -> str:
     await proc_module.ensure_started()
 
     if lib_name:
-        lua_code = f'local results = mem.search("{pattern}", "{lib_name}"); mem.dump(results)'
+        lua_code = f'local results = Memory.search("{pattern}", "{lib_name}"); Memory.dump(results)'
     else:
-        lua_code = f'local results = mem.search("{pattern}"); mem.dump(results)'
+        lua_code = f'local results = Memory.search("{pattern}"); Memory.dump(results)'
 
     proc_module.process.stdin.write(f"exec {lua_code}\n".encode())
     await proc_module.process.stdin.drain()

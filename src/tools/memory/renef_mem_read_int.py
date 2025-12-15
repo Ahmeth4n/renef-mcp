@@ -15,7 +15,7 @@ async def renef_mem_read_u8(address: str) -> str:
     """
     await proc_module.ensure_started()
 
-    lua_code = f'local val = mem.readU8({address}); print(val and string.format("0x%x (%d)", val, val) or "nil")'
+    lua_code = f'local val = Memory.readU8({address}); print(val and string.format("0x%x (%d)", val, val) or "nil")'
     proc_module.process.stdin.write(f"exec {lua_code}\n".encode())
     await proc_module.process.stdin.drain()
 
@@ -35,7 +35,7 @@ async def renef_mem_read_u16(address: str) -> str:
     """
     await proc_module.ensure_started()
 
-    lua_code = f'local val = mem.readU16({address}); print(val and string.format("0x%x (%d)", val, val) or "nil")'
+    lua_code = f'local val = Memory.readU16({address}); print(val and string.format("0x%x (%d)", val, val) or "nil")'
     proc_module.process.stdin.write(f"exec {lua_code}\n".encode())
     await proc_module.process.stdin.drain()
 
@@ -55,7 +55,7 @@ async def renef_mem_read_u32(address: str) -> str:
     """
     await proc_module.ensure_started()
 
-    lua_code = f'local val = mem.readU32({address}); print(val and string.format("0x%x (%d)", val, val) or "nil")'
+    lua_code = f'local val = Memory.readU32({address}); print(val and string.format("0x%x (%d)", val, val) or "nil")'
     proc_module.process.stdin.write(f"exec {lua_code}\n".encode())
     await proc_module.process.stdin.drain()
 
@@ -75,7 +75,7 @@ async def renef_mem_read_u64(address: str) -> str:
     """
     await proc_module.ensure_started()
 
-    lua_code = f'local val = mem.readU64({address}); print(val and string.format("0x%x", val) or "nil")'
+    lua_code = f'local val = Memory.readU64({address}); print(val and string.format("0x%x", val) or "nil")'
     proc_module.process.stdin.write(f"exec {lua_code}\n".encode())
     await proc_module.process.stdin.drain()
 
