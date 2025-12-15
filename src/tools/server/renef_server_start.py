@@ -32,9 +32,10 @@ async def renef_server_start() -> str:
     )
     await proc.communicate()
 
-    # Start server in background
+    # Start server in background with logging
     proc = await asyncio.create_subprocess_exec(
-        "adb", "shell", "nohup", "/data/local/tmp/renef_server", ">", "/dev/null", "2>&1", "&",
+        "adb", "shell", "su", "-c",
+        "nohup /data/local/tmp/renef_server > /data/local/tmp/renef.log 2>&1 &",
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.STDOUT,
     )
