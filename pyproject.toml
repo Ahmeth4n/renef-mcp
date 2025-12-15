@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "renef-mcp"
-version = "0.1.0"
+version = "0.1.1"
 description = "MCP server for Renef - Dynamic Instrumentation Toolkit for Android ARM64"
 readme = "README.md"
 authors = [
