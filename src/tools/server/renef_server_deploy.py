@@ -10,7 +10,7 @@ async def renef_server_deploy() -> str:
 
     Pushes:
         - renef_server -> /data/local/tmp/renef_server
-        - libagent.so -> /data/local/tmp/.r
+        - libagent.so -> /sdcard/Android/.cache
 
     Also makes renef_server executable.
 
@@ -33,14 +33,22 @@ async def renef_server_deploy() -> str:
     stdout, _ = await proc.communicate()
     results.append(f"renef_server: {stdout.decode('utf-8', errors='replace').strip()}")
 
-    # Push libagent.so
+    # Push libagent.so to hidden path
     proc = await asyncio.create_subprocess_exec(
-        "adb", "push", agent_path, "/data/local/tmp/.r",
+        "adb", "push", agent_path, "/sdcard/Android/.cache",
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.STDOUT,
     )
     stdout, _ = await proc.communicate()
     results.append(f"libagent.so: {stdout.decode('utf-8', errors='replace').strip()}")
+
+    # Make agent executable
+    proc = await asyncio.create_subprocess_exec(
+        "adb", "shell", "chmod", "+x", "/sdcard/Android/.cache",
+        stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.STDOUT,
+    )
+    await proc.communicate()
 
     # Make renef_server executable
     proc = await asyncio.create_subprocess_exec(

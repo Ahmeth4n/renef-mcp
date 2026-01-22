@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "renef-mcp"
-version = "0.1.1"
+version = "0.2.0"
 description = "MCP server for Renef - Dynamic Instrumentation Toolkit for Android ARM64"
 readme = "README.md"
 authors = [
@@ -51,7 +51,7 @@ Issues = "https://github.com/ahmeth4n/renef-mcp/issues"
 renef-mcp = "src.main:main"
 
 [tool.setuptools]
-packages = ["src", "src.tools", "src.tools.core", "src.tools.memory", "src.tools.module", "src.tools.server", "src.tools.search", "src.tools.adb", "src.tools.hook", "src.resources", "src.resources.techniques"]
+packages = ["src", "src.tools", "src.tools.core", "src.tools.memory", "src.tools.module", "src.tools.server", "src.tools.search", "src.tools.adb", "src.tools.hook", "src.tools.file", "src.tools.jni", "src.resources", "src.resources.techniques"]
 
 [tool.setuptools.package-data]
 src = [

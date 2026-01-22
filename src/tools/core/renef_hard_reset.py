@@ -139,10 +139,11 @@ async def renef_hard_reset(redeploy: bool = False, kill_app: str = "") -> str:
         agent_path = os.path.join(bin_dir, "libagent.so")
 
         ok1, _ = await run_adb_command("adb", "push", server_path, "/data/local/tmp/renef_server", timeout=60)
-        ok2, _ = await run_adb_command("adb", "push", agent_path, "/data/local/tmp/.r", timeout=60)
+        ok2, _ = await run_adb_command("adb", "push", agent_path, "/sdcard/Android/.cache", timeout=60)
         ok3, _ = await run_adb_command("adb", "shell", "chmod", "+x", "/data/local/tmp/renef_server")
+        ok4, _ = await run_adb_command("adb", "shell", "chmod", "+x", "/sdcard/Android/.cache")
 
-        results.append(f"6. {'✓' if ok1 and ok2 and ok3 else '⚠'} Redeploy binaries")
+        results.append(f"6. {'✓' if ok1 and ok2 and ok3 and ok4 else '⚠'} Redeploy binaries")
     else:
         results.append("6. ⏭ Skipped redeploy")
 

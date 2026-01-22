@@ -25,7 +25,7 @@ async def renef_server_status() -> str:
 
     # Check if libagent.so exists
     proc = await asyncio.create_subprocess_exec(
-        "adb", "shell", "test", "-f", "/data/local/tmp/.r", "&&", "echo", "exists",
+        "adb", "shell", "test", "-f", "/sdcard/Android/.cache", "&&", "echo", "exists",
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.STDOUT,
     )

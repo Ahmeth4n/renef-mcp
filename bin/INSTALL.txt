@@ -1,4 +1,4 @@
-Renef v0.1.0 - Installation Guide
+Renef v0.2.1 - Installation Guide
 =====================================
 
 Platform-specific binaries:

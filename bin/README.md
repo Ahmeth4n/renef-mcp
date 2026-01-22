@@ -232,6 +232,14 @@ hook(lib_name, func.offset, {
                         └──────────────────┘
 ```
 
+## Community
+
+Join our community to get help, share scripts, and discuss security research:
+
+[![Telegram](https://img.shields.io/badge/Telegram-2CA5E0?style=flat-square&logo=telegram&logoColor=white)](https://t.me/+W5oJDYXg22FmMDA0)
+[![X](https://img.shields.io/badge/X-000000?style=flat-square&logo=x&logoColor=white)](https://x.com/renef0x)
+[![Discord](https://img.shields.io/badge/Discord-5865F2?style=flat-square&logo=discord&logoColor=white)](https://discord.gg/776bkf5U)
+
 ## Acknowledgements
 
 This project was inspired by [Frida](https://frida.re) and [Radare2](https://rada.re). Special thanks to their developers for creating excellent tools that shaped the design of Renef.

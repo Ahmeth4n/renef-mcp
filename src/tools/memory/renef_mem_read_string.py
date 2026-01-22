@@ -3,13 +3,13 @@ from src import process as proc_module
 
 
 @mcp.tool()
-async def renef_mem_read_string(address: str, max_length: int = 1024) -> str:
+async def renef_mem_read_string(address: str, max_length: int = 256) -> str:
     """
     Reads a null-terminated string from memory.
 
     Args:
         address: Memory address (e.g., '0x7f8a1c2b0')
-        max_length: Maximum string length to read (default: 1024)
+        max_length: Maximum string length to read (default: 256)
 
     Returns:
         String value or nil

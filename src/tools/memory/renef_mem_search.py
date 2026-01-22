@@ -7,12 +7,18 @@ async def renef_mem_search(pattern: str, lib_name: str = "") -> str:
     """
     Searches memory for a string or hex pattern with wildcard support.
 
+    Pattern formats:
+    - Plain string: 'hello' or 'secret'
+    - Hex bytes: 'DEADBEEF' or 'DE AD BE EF' (spaces optional)
+    - Wildcards: 'DE ?? AD BE' where ?? matches any byte
+    - Mixed: '48 65 6C 6C 6F' (hex for 'Hello')
+
     Args:
-        pattern: Search pattern - string or hex bytes (e.g., 'secret', 'DEADBEEF', '90??90')
-        lib_name: Optional library name to limit search scope
+        pattern: Search pattern - string, hex bytes, or hex with ?? wildcards
+        lib_name: Optional library name to limit search scope (e.g., 'libc.so')
 
     Returns:
-        Table of search results with addresses
+        Formatted search results showing library, offset, address, hex dump, and ASCII
     """
     await proc_module.ensure_started()
 
