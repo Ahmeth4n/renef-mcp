@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "renef-mcp"
-version = "0.2.0"
+version = "0.3.0"
 description = "MCP server for Renef - Dynamic Instrumentation Toolkit for Android ARM64"
 readme = "README.md"
 authors = [
@@ -61,7 +61,8 @@ src = [
     "../bin/linux/*",
     "../bin/macos-arm64/*",
     "../bin/macos-x64/*",
-    "../bin/scripts/*.lua"
+    "../bin/scripts/*.lua",
+    "../bin/scripts/examples/*.lua"
 ]
 
 [tool.black]
