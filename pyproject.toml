@@ -4,14 +4,14 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "renef-mcp"
-version = "0.3.0"
-description = "MCP server for Renef - Dynamic Instrumentation Toolkit for Android ARM64"
+version = "0.4.0"
+description = "MCP server for Renef v0.4.0 - Dynamic Instrumentation Toolkit for Android ARM64"
 readme = "README.md"
 authors = [
     {name = "Byteria", email = "info@byterialab.com"}
 ]
 license = {text = "MIT"}
-requires-python = ">=3.8"
+requires-python = ">=3.10"
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
@@ -19,11 +19,10 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Topic :: Security",
     "Topic :: Software Development :: Debuggers",
     "Topic :: System :: Monitoring",
@@ -37,6 +36,7 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
     "pytest>=7.0.0",
+    "pytest-asyncio>=0.23.0",
     "black>=22.0.0",
     "ruff>=0.1.0",
 ]
@@ -44,31 +44,56 @@ dev = [
 [project.urls]
 Homepage = "https://renef.io"
 Documentation = "https://renef.io/"
-Repository = "https://github.com/ahmeth4n/renef-mcp"
-Issues = "https://github.com/ahmeth4n/renef-mcp/issues"
+Repository = "https://github.com/Ahmeth4n/renef-mcp"
+Issues = "https://github.com/Ahmeth4n/renef-mcp/issues"
 
 [project.scripts]
 renef-mcp = "src.main:main"
 
 [tool.setuptools]
-packages = ["src", "src.tools", "src.tools.core", "src.tools.memory", "src.tools.module", "src.tools.server", "src.tools.search", "src.tools.adb", "src.tools.hook", "src.tools.file", "src.tools.jni", "src.resources", "src.resources.techniques"]
+packages = [
+    "src",
+    "src.renef_client",
+    "src.tools",
+    "src.tools.core",
+    "src.tools.hook",
+    "src.tools.memory",
+    "src.tools.module",
+    "src.tools.java",
+    "src.tools.system",
+    "src.tools.server",
+    "src.tools.adb",
+    "src.tools.search",
+    "src.resources",
+    "src.resources.techniques",
+]
 
 [tool.setuptools.package-data]
 src = [
     "techniques/**/*.md",
-    "docs/**/*",
+    "techniques/**/*.json",
     "../bin/android/*",
     "../bin/linux/*",
     "../bin/macos-arm64/*",
     "../bin/macos-x64/*",
-    "../bin/scripts/*.lua",
-    "../bin/scripts/examples/*.lua"
+    "../bin/INSTALL.txt",
+    "../bin/README.md",
+    "../bin/LICENSE",
+    "../bin/scripts/examples/*.lua",
+    "../bin/scripts/examples/frida_labs/*",
+    "../bin/scripts/recipes/*",
 ]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+pythonpath = ["."]
+testpaths = ["tests"]
 
 [tool.black]
 line-length = 100
-target-version = ['py38']
+target-version = ["py310"]
 
 [tool.ruff]
 line-length = 100
-target-version = "py38"
+target-version = "py310"

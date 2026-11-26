@@ -1,6 +1,6 @@
 #!/bin/bash
+set -e
 cd "$(dirname "$0")"
-export DYLD_LIBRARY_PATH="/opt/homebrew/opt/readline/lib:$DYLD_LIBRARY_PATH"
 
 if [ ! -d ".venv" ]; then
     echo "Creating virtual environment..."
@@ -9,4 +9,4 @@ if [ ! -d ".venv" ]; then
     .venv/bin/pip install -r requirements.txt
 fi
 
-.venv/bin/python -m src.main
+exec .venv/bin/python -m src.main

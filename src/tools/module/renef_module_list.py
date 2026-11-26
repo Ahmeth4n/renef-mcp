@@ -1,19 +1,48 @@
 from src.app import mcp
-from src import process as proc_module
+from src.session import format_error, manager, to_json
 
 
 @mcp.tool()
-async def renef_module_list() -> str:
-    """
-    Lists all loaded .so libraries in the target process with their addresses.
+async def renef_module_list(filter: str = "", limit: int = 200) -> str:
+    """List loaded modules/libraries in the target process with base addresses and sizes.
+
+    Args:
+        filter: Optional case-insensitive substring filter on module name or path (e.g., "ssl", "flutter")
+        limit: Maximum entries to return (default: 200)
 
     Returns:
-        List of loaded libraries with base addresses
+        JSON object with total count and module records
     """
-    await proc_module.ensure_started()
+    try:
+        cap = max(1, min(int(limit), 2000))
 
-    lua_code = 'print(Module.list())'
-    proc_module.process.stdin.write(f"exec {lua_code}\n".encode())
-    await proc_module.process.stdin.drain()
+        def _list():
+            session = manager.require_session()
+            return session.Module.list()
 
-    return await proc_module.read_until_prompt()
+        modules = await manager.call(_list)
+        if filter.strip():
+            flt = filter.strip().lower()
+            modules = [m for m in modules if flt in m.name.lower() or flt in m.path.lower()]
+
+        shown = modules[:cap]
+        return to_json(
+            {
+                "ok": True,
+                "total": len(modules),
+                "returned": len(shown),
+                "modules": [
+                    {
+                        "name": m.name,
+                        "base": m.base,
+                        "base_hex": f"0x{m.base:x}",
+                        "size": m.size,
+                        "size_hex": f"0x{m.size:x}",
+                        "path": m.path,
+                    }
+                    for m in shown
+                ],
+            }
+        )
+    except Exception as exc:
+        return format_error(exc)

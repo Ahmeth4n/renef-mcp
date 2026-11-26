@@ -1,19 +1,16 @@
-import asyncio
 from src.app import mcp
+from src.session import format_error, run_adb
 
 
 @mcp.tool()
 async def adb_devices() -> str:
-    """
-    Lists connected Android devices.
+    """List connected Android devices (`adb devices -l`).
 
     Returns:
-        ADB devices output
+        Connected ADB devices output
     """
-    proc = await asyncio.create_subprocess_exec(
-        "adb", "devices", "-l",
-        stdout=asyncio.subprocess.PIPE,
-        stderr=asyncio.subprocess.STDOUT,
-    )
-    stdout, _ = await proc.communicate()
-    return stdout.decode("utf-8", errors="replace").strip()
+    try:
+        _, out = await run_adb("devices", "-l", timeout=10.0)
+        return out or "No ADB devices found."
+    except Exception as exc:
+        return format_error(exc)

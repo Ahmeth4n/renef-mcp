@@ -1,18 +1,19 @@
 from src.app import mcp
-from src import process as proc_module
+from src.session import format_error, manager
 
 
 @mcp.tool()
 async def renef_hooks_list() -> str:
-    """
-    Lists all active hooks.
+    """List all active native and Java hooks with their IDs (`0`, `j0`, ...) and hit counts.
 
     Returns:
-        List of active hooks with their IDs
+        Formatted list of active native and Java hooks from the agent
     """
-    await proc_module.ensure_started()
+    try:
+        def _hooks():
+            session = manager.require_session()
+            return session.hooks().strip()
 
-    proc_module.process.stdin.write(b"hooks\n")
-    await proc_module.process.stdin.drain()
-
-    return await proc_module.read_until_prompt()
+        return await manager.call(_hooks)
+    except Exception as exc:
+        return format_error(exc)

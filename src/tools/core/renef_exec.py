@@ -1,21 +1,48 @@
 from src.app import mcp
-from src import process as proc_module
+from src.session import format_error, manager, to_json
 
 
 @mcp.tool()
-async def renef_exec(lua_code: str) -> str:
-    """
-    Executes Lua code in the target process.
+async def renef_exec(lua_code: str, timeout: float = 30.0) -> str:
+    """Execute single-line or multi-line Lua 5.4 code in the target process.
+
+    Uses Renef v0.4.0's framed protocol and safe quoting (no 64 KB limit, no temp files,
+    safe with newlines, quotes, `//`, and `~`). Returns printed output and exact Lua
+    compile/runtime error messages.
+
+    IMPORTANT: Use Renef Lua API (`hook`, `Interceptor`, `NativeFunction`, `Memory`,
+    `Module`, `Process`, `Thread`, `Java`, `Jni`, `Syscall`, `OS`, `File`, `KCov`, `send`),
+    NOT Frida JS syntax. See `renef://api-reference`.
 
     Args:
-        lua_code: Lua code to execute (e.g., 'Module.list()', 'print("hello")')
+        lua_code: Lua code to execute in the target process
+        timeout: Silence timeout in seconds (default: 30.0)
 
     Returns:
-        Execution result
+        JSON object with `ok`, `output`, `error`, and any queued event hint
     """
-    await proc_module.ensure_started()
+    try:
+        if not lua_code or not lua_code.strip():
+            return "ERROR: lua_code cannot be empty"
 
-    proc_module.process.stdin.write(f"exec {lua_code}\n".encode())
-    await proc_module.process.stdin.drain()
+        def _exec():
+            session = manager.require_session()
+            result = session.eval(lua_code, timeout=timeout)
+            ev_count, out_count = session.pending_counts()
+            return result, ev_count, out_count
 
-    return await proc_module.read_until_prompt()
+        result, ev_count, out_count = await manager.call(_exec)
+        if result.ok:
+            manager.mark_exec_completed()
+        payload = {
+            "ok": result.ok,
+            "output": result.output or "",
+            "error": result.error,
+        }
+        if ev_count or out_count:
+            payload["queued_events"] = ev_count
+            payload["queued_hook_output_lines"] = out_count
+            payload["hint"] = "Call `renef_events` to retrieve queued hook/send() events."
+        return to_json(payload)
+    except Exception as exc:
+        return format_error(exc)

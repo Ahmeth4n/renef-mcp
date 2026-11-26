@@ -10,6 +10,7 @@ dist/
 build/
 *.egg-info/
 .eggs/
+.pytest_cache/
 
 # Virtual environment
 .venv/
@@ -28,3 +29,4 @@ env/
 # Temporary download files
 *.tar.gz
 renef-v*
+.env

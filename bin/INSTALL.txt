@@ -1,19 +1,26 @@
-Renef v0.2.1 - Installation Guide
+Renef v0.4.0 - Installation Guide
 =====================================
 
 Platform-specific binaries:
 - linux/renef                : Linux x64 client
+- linux/renef-strace         : Linux x64 strace client
 - macos-x64/renef            : macOS Intel client
+- macos-x64/renef-strace     : macOS Intel strace client
 - macos-arm64/renef          : macOS Silicon (ARM64) client
+- macos-arm64/renef-strace   : macOS Silicon strace client
 - android/renef_server       : Android ARM64 server
 - android/libagent.so        : Android ARM64 payload
+- android/renef              : Android ARM64 client (Termux)
+- android/renef-strace       : Android ARM64 strace client (Termux)
 
 Quick Start (Linux):
 1. Extract archive
 2. Push to Android device:
-   adb push android/renef_server /data/local/tmp/
-   adb push android/libagent.so /data/local/tmp/.r
+   adb push android/renef_server /data/local/tmp/renef_server
+   adb push android/libagent.so /data/local/tmp/libagent.so
    adb shell chmod +x /data/local/tmp/renef_server
+   adb shell chmod 777 /data/local/tmp/libagent.so
+   adb shell su -c "chcon u:object_r:app_data_file:s0 /data/local/tmp/libagent.so"
 3. Setup port forwarding:
    adb forward tcp:1907 localabstract:com.android.internal.os.RuntimeInit
 4. Start server on device:
