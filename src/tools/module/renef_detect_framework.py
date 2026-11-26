@@ -1,62 +1,81 @@
 from src.app import mcp
-from src import process as proc_module
-from src.tools.core.renef_zero_copy_multiline_exec import zero_copy_multiline_exec
+from src.session import format_error, manager, to_json, u64
+
+_FRAMEWORK_LIBS = {
+    "flutter": ["libflutter.so", "libapp.so"],
+    "react_native": ["libhermes.so", "libreactnativejni.so", "libreactnative.so"],
+    "unity": ["libunity.so", "libil2cpp.so"],
+    "xamarin": ["libmono-android.so", "libmono.so", "libmonodroid.so"],
+    "cordova_ionic": ["libcordova.so"],
+    "nativescript": ["libnativescript.so"],
+}
 
 
 @mcp.tool()
 async def renef_detect_framework() -> str:
-    """
-    Detects the application framework by analyzing loaded libraries.
+    """Detect the Android app's framework by checking loaded native libraries.
 
-    Identifies common frameworks such as:
-    - Flutter (libflutter.so, libapp.so)
-    - React Native (libhermes.so, libreactnativejni.so)
-    - Unity (libunity.so, libil2cpp.so)
-    - Xamarin (libmono-android.so, libmono.so)
-    - Native (no framework detected)
+    Identifies Flutter, React Native, Unity, Xamarin, Cordova/Ionic, NativeScript, or
+    Android Native, and recommends the matching `techniques://ssl_pinning/{platform}` URI.
 
     Returns:
-        Detected framework information with library details
+        JSON object with detected frameworks, matched libraries + hex base addresses, and resource hints
     """
-    await proc_module.ensure_started()
+    try:
+        lua_expr = (
+            "(function() "
+            "local fw = {"
+            'flutter={"libflutter.so","libapp.so"}, '
+            'react_native={"libhermes.so","libreactnativejni.so","libreactnative.so"}, '
+            'unity={"libunity.so","libil2cpp.so"}, '
+            'xamarin={"libmono-android.so","libmono.so","libmonodroid.so"}, '
+            'cordova_ionic={"libcordova.so"}, '
+            'nativescript={"libnativescript.so"}'
+            "} "
+            "local res = {} "
+            "for k, libs in pairs(fw) do "
+            "  local hits = {} "
+            "  for _, lib in ipairs(libs) do "
+            "    local b = Module.find(lib) "
+            "    if b then hits[#hits+1] = {name=lib, base=b} end "
+            "  end "
+            "  if #hits > 0 then res[k] = hits end "
+            "end "
+            "return res end)()"
+        )
 
-    # Lua code to detect frameworks
-    lua_code = """
-local frameworks = {
-    flutter = {"libflutter.so", "libapp.so"},
-    react_native = {"libhermes.so", "libreactnativejni.so", "libreactnative.so"},
-    unity = {"libunity.so", "libil2cpp.so"},
-    xamarin = {"libmono-android.so", "libmono.so", "libmonodroid.so"},
-    cordova = {"libcordova.so"},
-    ionic = {"libcordova.so"},
-    native_script = {"libnativescript.so"}
-}
+        def _detect():
+            session = manager.require_session()
+            return session.rpc(lua_expr) or {}
 
-local detected = {}
+        raw = await manager.call(_detect)
+        detected = {}
+        if isinstance(raw, dict):
+            for fw_name, libs in raw.items():
+                if isinstance(libs, list):
+                    detected[fw_name] = [
+                        {
+                            "name": entry.get("name", ""),
+                            "base": u64(entry.get("base", 0)),
+                            "base_hex": f"0x{u64(entry.get('base', 0)):x}",
+                        }
+                        for entry in libs
+                        if isinstance(entry, dict)
+                    ]
 
-for framework, libs in pairs(frameworks) do
-    for _, lib_pattern in ipairs(libs) do
-        local lib_base = Module.find(lib_pattern)
-        if lib_base then
-            if not detected[framework] then
-                detected[framework] = {}
-            end
-            table.insert(detected[framework], {name = lib_pattern, base = lib_base})
-        end
-    end
-end
-
-if next(detected) == nil then
-    print("Framework: Native")
-    print("No common framework libraries detected")
-else
-    for framework, libs in pairs(detected) do
-        print("Framework: " .. framework)
-        for _, lib in ipairs(libs) do
-            print("  - " .. lib.name .. " @ " .. lib.base)
-        end
-    end
-end
-"""
-
-    return await zero_copy_multiline_exec(lua_code)
+        primary = next(iter(detected.keys()), "android_native")
+        ssl_resource = (
+            f"techniques://ssl_pinning/{primary}"
+            if primary in ("flutter", "react_native", "unity", "xamarin", "cordova_ionic", "android_native")
+            else "techniques://ssl_pinning/android_native"
+        )
+        return to_json(
+            {
+                "ok": True,
+                "primary_framework": primary,
+                "detected": detected,
+                "ssl_pinning_resource": ssl_resource,
+            }
+        )
+    except Exception as exc:
+        return format_error(exc)

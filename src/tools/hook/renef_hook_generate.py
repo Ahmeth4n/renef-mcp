@@ -1,34 +1,40 @@
 from src.app import mcp
-from src import process as proc_module
+from src.session import format_error, manager
 
 
 @mcp.tool()
 async def renef_hook_generate(lib_name: str = "", offset_or_symbol: str = "") -> str:
-    """
-    Generates a Lua hook template.
+    """Generate a Renef Lua hook template using the server's `hookgen` command.
+
+    Examples:
+    - `renef_hook_generate("libnative.so", "0x1234")` — template for offset
+    - `renef_hook_generate("libc.so", "malloc")` — template for symbol in library
+    - `renef_hook_generate("malloc")` — search symbol across loaded libraries
 
     Args:
-        lib_name: Library name (e.g., 'libnative.so'). If only this is provided, searches symbol in all libs.
-        offset_or_symbol: Hex offset (e.g., '0x1234') or symbol name
-
-    Usage:
-        renef_hook_generate("libnative.so", "0x1234")  - Generate hook for specific offset
-        renef_hook_generate("libnative.so", "malloc")  - Generate hook for symbol in lib
-        renef_hook_generate("malloc")                  - Search symbol in all libraries
+        lib_name: Library name, or symbol name if `offset_or_symbol` is omitted
+        offset_or_symbol: Optional hex offset or symbol name inside `lib_name`
 
     Returns:
-        Generated hook template code
+        Generated Lua hook template
     """
-    await proc_module.ensure_started()
+    try:
+        a = lib_name.strip()
+        b = offset_or_symbol.strip()
+        if a and b:
+            cmd = f"hookgen {a} {b}"
+        elif a:
+            cmd = f"hookgen {a}"
+        else:
+            cmd = "hookgen"
 
-    if lib_name and offset_or_symbol:
-        cmd = f"hookgen {lib_name} {offset_or_symbol}\n"
-    elif lib_name:
-        cmd = f"hookgen {lib_name}\n"
-    else:
-        cmd = "hookgen\n"
+        def _gen():
+            session = manager.get_session()
+            if session is not None:
+                return session.command(cmd).strip()
+            client = manager.get_client()
+            return client._text(cmd).strip()
 
-    proc_module.process.stdin.write(cmd.encode())
-    await proc_module.process.stdin.drain()
-
-    return await proc_module.read_until_prompt()
+        return await manager.call(_gen)
+    except Exception as exc:
+        return format_error(exc)

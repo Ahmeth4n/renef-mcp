@@ -1,26 +1,23 @@
 from src.app import mcp
-from src import process as proc_module
+from src.session import format_error, manager, to_json
 
 
 @mcp.tool()
 async def renef_list_apps(filter: str = "") -> str:
-    """
-    Lists installed applications on the Android device via renef.
+    """List installed applications on the Android device via renef_server (no injection needed).
 
     Args:
-        filter: Optional filter string (e.g., 'chrome', 'google')
+        filter: Optional substring filter for package names (e.g., "chrome", "example")
 
     Returns:
-        List of installed apps
+        JSON object with count and sorted package names
     """
-    await proc_module.ensure_started()
+    try:
+        def _list():
+            client = manager.get_client()
+            return client.list_apps(filter or None)
 
-    if filter:
-        cmd = f"la~{filter}\n"
-    else:
-        cmd = "la\n"
-
-    proc_module.process.stdin.write(cmd.encode())
-    await proc_module.process.stdin.drain()
-
-    return await proc_module.read_until_prompt()
+        apps = await manager.call(_list)
+        return to_json({"count": len(apps), "packages": apps})
+    except Exception as exc:
+        return format_error(exc)

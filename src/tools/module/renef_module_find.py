@@ -1,22 +1,35 @@
 from src.app import mcp
-from src import process as proc_module
+from src.session import format_error, manager, to_json
 
 
 @mcp.tool()
 async def renef_module_find(lib_name: str) -> str:
-    """
-    Finds the base address of a loaded library in the target process.
+    """Find the base address of a loaded library in the target process (`Module.find`).
 
     Args:
-        lib_name: Library name (e.g., 'libc.so', 'libflutter.so'). Supports partial matches.
+        lib_name: Library name (e.g., "libc.so", "libflutter.so"). Supports partial matches.
 
     Returns:
-        Base address of the library or nil if not found
+        JSON object with `found`, `base`, and `base_hex`
     """
-    await proc_module.ensure_started()
+    try:
+        lib = lib_name.strip()
+        if not lib:
+            return "ERROR: lib_name cannot be empty"
 
-    lua_code = f'local addr = Module.find("{lib_name}"); if addr then print(string.format("0x%x", addr)) else print("nil") end'
-    proc_module.process.stdin.write(f"exec {lua_code}\n".encode())
-    await proc_module.process.stdin.drain()
+        def _find():
+            session = manager.require_session()
+            return session.Module.find(lib)
 
-    return await proc_module.read_until_prompt()
+        base = await manager.call(_find)
+        return to_json(
+            {
+                "ok": True,
+                "lib": lib,
+                "found": bool(base),
+                "base": base or None,
+                "base_hex": f"0x{base:x}" if base else None,
+            }
+        )
+    except Exception as exc:
+        return format_error(exc)

@@ -1,27 +1,63 @@
 from src.app import mcp
-from src import process as proc_module
+from src.session import format_error, manager, parse_address, parse_hex_bytes, to_json
 
 
 @mcp.tool()
-async def renef_mem_write(address: str, hex_bytes: str) -> str:
-    """
-    Writes raw bytes to memory at the specified address.
+async def renef_mem_write(
+    address: str,
+    value: str,
+    type: str = "hex",
+    patch: bool = False,
+) -> str:
+    """Write bytes or integers to target process memory (with optional code-page patching).
+
+    - When `patch=True` (or writing to read-only/executable code pages), uses `Memory.patch`
+      which automatically handles `mprotect` and instruction cache flushing.
+    - Supports `type`: `"hex"` (e.g. `"C0035FD6"` = ARM64 `RET`), `"u8"`, `"u16"`, `"u32"`, `"u64"`.
 
     Args:
-        address: Memory address (e.g., '0x7f8a1c2b0')
-        hex_bytes: Hex string of bytes to write (e.g., '90909090', 'C0035FD6')
+        address: Target memory address (e.g., "0x7f8a1c2b0")
+        value: Hex bytes string (for type="hex") or integer string (decimal or "0x..." hex)
+        type: Data type - "hex" (default), "u8", "u16", "u32", "u64"
+        patch: Force `Memory.patch` (auto mprotect for RX/RO code pages)
 
     Returns:
-        Success status
+        JSON status confirming bytes written
     """
-    await proc_module.ensure_started()
+    try:
+        addr = parse_address(address)
+        if addr == 0:
+            return "ERROR: address must be non-zero"
+        dtype = type.strip().lower()
+        int_sizes = {"u8": 1, "u16": 2, "u32": 4, "u64": 8}
 
-    lua_code = f'local ok = Memory.write({address}, "\\x{hex_bytes}"); print(ok and "✓ written" or "✗ failed")'
-    # Need to properly escape the hex bytes
-    byte_str = ''.join([f'\\x{hex_bytes[i:i+2]}' for i in range(0, len(hex_bytes), 2)])
-    lua_code = f'local ok = Memory.write({address}, "{byte_str}"); print(ok and "✓ written" or "✗ failed")'
+        if dtype == "hex":
+            data = parse_hex_bytes(value)
+        elif dtype in int_sizes:
+            size = int_sizes[dtype]
+            num = int(str(value).strip(), 0)
+            mask = (1 << (8 * size)) - 1
+            data = (num & mask).to_bytes(size, "little")
+        else:
+            return "ERROR: type must be 'hex', 'u8', 'u16', 'u32', or 'u64'"
 
-    proc_module.process.stdin.write(f"exec {lua_code}\n".encode())
-    await proc_module.process.stdin.drain()
+        def _write():
+            session = manager.require_session()
+            if patch:
+                session.Memory.patch(addr, data)
+                return len(data), "patch"
+            written = session.Memory.write(addr, data)
+            return written, "write"
 
-    return await proc_module.read_until_prompt()
+        written, method = await manager.call(_write)
+        return to_json(
+            {
+                "ok": True,
+                "address": f"0x{addr:x}",
+                "method": method,
+                "bytes_written": written,
+                "hex": data.hex(),
+            }
+        )
+    except Exception as exc:
+        return format_error(exc)

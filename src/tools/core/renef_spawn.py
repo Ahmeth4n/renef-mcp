@@ -1,40 +1,59 @@
 from src.app import mcp
-from src import process as proc_module
+from src.session import format_error, manager, to_json
 
 
 @mcp.tool()
-async def renef_spawn(package_name: str, hook_type: str = "") -> str:
-    """
-    Spawns a new process and injects the renef payload.
+async def renef_spawn(
+    package_name: str,
+    pause: bool = False,
+    hold: bool = True,
+    timeout: float = 30.0,
+) -> str:
+    """Spawn an Android app and inject the Renef v0.4.0 agent (libagent.so).
+
+    Default injection (`pause=False`) is signal-based (NO ptrace, immune to TracerPid checks).
+    With `pause=True`, uses the ptrace spawn gate to freeze the main thread before app code runs
+    so deferred hooks on not-yet-loaded libraries catch the very first call.
+
+    Anti-debug note: `pause=True` sets TracerPid != 0 while paused. Prefer `pause=False` against
+    targets suspected of anti-debug/ptrace checks unless early-hook timing is specifically needed.
 
     Args:
-        package_name: The package name of the app to spawn (e.g., com.example.app)
-        hook_type: Hooking mechanism - 'pltgot' for PLT/GOT hooking, empty for default trampoline
+        package_name: Android package name (e.g., "com.example.app")
+        pause: Freeze the app at startup via ptrace spawn gate (default: False)
+        hold: When `pause=True`, keep the app frozen across multiple exec/hook calls until
+              `renef_resume()` is explicitly called (default: True)
+        timeout: Spawn & injection timeout in seconds (default: 30.0)
 
     Returns:
-        Spawn result (OK <pid> on success)
+        JSON status with spawned PID and next-step guidance
     """
-    await proc_module.ensure_started()
+    try:
+        pkg = package_name.strip()
+        if not pkg:
+            return "ERROR: package_name cannot be empty"
 
-    if hook_type:
-        cmd = f"spawn {package_name} --hook={hook_type}\n"
-    else:
-        cmd = f"spawn {package_name}\n"
+        def _spawn():
+            client = manager.get_client()
+            return client.spawn_app(pkg, pause=pause, hold=hold, timeout=timeout)
 
-    proc_module.process.stdin.write(cmd.encode())
-    await proc_module.process.stdin.drain()
+        session = await manager.call(_spawn)
+        manager.set_session(session, package=pkg, paused=pause, hold=hold)
 
-    result = await proc_module.read_until_prompt()
-
-    # Parse PID from "OK <pid>" response and store it
-    # Example: "spawn com.example.app\nOK 12345"
-    for line in result.split('\n'):
-        line = line.strip()
-        if line.startswith("OK "):
-            parts = line.split()
-            if len(parts) >= 2 and parts[1].isdigit():
-                proc_module.current_target_pid = int(parts[1])
-                proc_module.current_target_package = package_name
-                break
-
-    return result
+        res = {
+            "ok": True,
+            "pid": session.pid,
+            "package": pkg,
+            "paused": pause,
+            "hold": pause and hold,
+        }
+        if pause:
+            res["note"] = (
+                "Target is paused at spawn gate. Install hooks/scripts now, then call "
+                "`renef_resume()` to let the app run."
+                if hold
+                else "Target is paused and will auto-resume on the first `renef_exec` / `renef_load_script`."
+            )
+        return to_json(res)
+    except Exception as exc:
+        return format_error(exc)
